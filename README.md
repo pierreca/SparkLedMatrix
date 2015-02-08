@@ -5,17 +5,19 @@ The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12
 - [x] First version of the PCB works fine (silkscreen isn't great though)
 - [x] Connect the current prototype to the Spark cloud
 - [x] Display messages sent to the device using the Spark cloud API
-- [ ] Clean PCB silk screen
-- [ ] Order more PCB and build more matrices.
+- [x] Clean PCB silk screen
+- [x] Order more PCBs
+- [ ] Build more Matrices
 - [ ] Build a "motherboard" on which LED matrix modules will be connected.
+- [ ] Verify code with 8 or more matrices.
 
 ## Hardware
 * [NFM-12883AS-11 LED Matrix](https://upverter.com/upn/b3a03be171307eb0/)
 * [AS1100PL driver (MAX7219 drop-in replacement)](https://www.modmypi.com/as1100pl-led-driver)
 * [Spark Core](http://www.spark.io)
-* Custom PCB: [Upverter](https://upverter.com/pierreca/2dc3fadd41948de2/NFM-12883-Backpack/) - [OshPark](https://oshpark.com/shared_projects/Dkkxd2oF)
+* Custom PCB: [Upverter](https://upverter.com/pierreca/2dc3fadd41948de2/NFM-12883-Backpack/) - [OshPark](https://oshpark.com/shared_projects/Awyc02gR)
 
-## Custom board
+## Custom PCB
 This is my first PCB built using Upverter and OshPark. It's exactly the size of an NFM-12883 LED Matrix, and has the LED matrix on one side, and the driver and passive components on the other, allowing to line-up horizontally and/or vertically  multiple LED matrices.
 
 ## Code
