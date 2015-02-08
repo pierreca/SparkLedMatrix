@@ -1,5 +1,4 @@
-# SparkLedMatrix
-Matrix of 16 8x8 LED Matrices (NFM-12883) driven from a spark core.
+The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12883) driven from a spark core that can be used to display... stuff :grin:
 
 ## Current status:
 - [x] Code to make text scroll across multiple matrices seems to work with 2 matrices.
