@@ -314,6 +314,11 @@ const static byte cp437_font [256] [8] = {
 };  //  end of cp437_font
 
 
+struct ColumnsTable {
+    byte *columns;
+    int columnsCount;
+};
+
 class LedControl {
  private :
     /* The array for shifting the data to the devices */
@@ -331,6 +336,8 @@ class LedControl {
     int SPI_CS;
     /* The maximum number of devices we use */
     int maxDevices;
+    uint8_t maxCols;
+    uint8_t colsPerDisplay = 8;
 
  public:
     /*
@@ -442,4 +449,15 @@ class LedControl {
     void setLetter (int addr, const byte c);
 
     void tweenLetters (int addr, const byte c1, const byte c2, int speed=100);
+
+    // Added by @pierreca
+    void setText(char *message, int messageLength);
+
+    void scrollText(char *message, int messageLength, int speed);
+
+    void buildTrimmedText(char *message, int messageLength, ColumnsTable *result, bool addPadding = false);
+
+    void setTextTrimSpaces(char *message, int messageLength);
+
+    void scrollTextTrimSpaces(char *message, int messageLength, int speed);
 };

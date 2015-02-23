@@ -24,7 +24,8 @@ LedControl::LedControl(int dataPin, int clkPin, int csPin, int numDevices) {
     SPI_CS=csPin;
     if(numDevices<=0 || numDevices>8 )
         numDevices=8;
-    maxDevices=numDevices;
+    maxDevices = numDevices;
+    maxCols = maxDevices * colsPerDisplay;
     pinMode(SPI_MOSI,OUTPUT);
     pinMode(SPI_CLK,OUTPUT);
     pinMode(SPI_CS,OUTPUT);
@@ -51,23 +52,23 @@ int LedControl::getDeviceCount() {
 
 void LedControl::shutdown(int addr, bool b) {
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(b)
-spiTransfer(addr, OP_SHUTDOWN,0);
+        spiTransfer(addr, OP_SHUTDOWN,0);
     else
-spiTransfer(addr, OP_SHUTDOWN,1);
+        spiTransfer(addr, OP_SHUTDOWN,1);
 }
 
 void LedControl::setScanLimit(int addr, int limit) {
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(limit>=0 && limit<8)
     spiTransfer(addr, OP_SCANLIMIT,limit);
 }
 
 void LedControl::setIntensity(int addr, int intensity) {
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(intensity>=0 && intensity<16)
 spiTransfer(addr, OP_INTENSITY,intensity);
 
@@ -80,8 +81,8 @@ void LedControl::clearDisplay(int addr) {
 return;
     offset=addr*8;
     for(int i=0;i<8;i++) {
-status[offset+i]=0;
-spiTransfer(addr, i+1,status[offset+i]);
+        status[offset+i]=0;
+        spiTransfer(addr, i+1,status[offset+i]);
     }
 }
 
@@ -107,9 +108,9 @@ status[offset+row]=status[offset+row]&val;
 void LedControl::setRow(int addr, int row, byte value) {
     int offset;
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(row<0 || row>7)
-return;
+        return;
     offset=addr*8;
     status[offset+row]=value;
     spiTransfer(addr, row+1,status[offset+row]);
@@ -119,13 +120,13 @@ void LedControl::setColumn(int addr, int col, byte value) {
     byte val;
 
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(col<0 || col>7)
-return;
+        return;
     for(int row=0;row<8;row++) {
-val=value >> (7-row);
-val=val & 0x01;
-setLed(addr,row,col,val);
+        val=value >> (7-row);
+        val=val & 0x01;
+        setLed(addr,row,col,val);
     }
 }
 
@@ -134,9 +135,9 @@ void LedControl::setDigit(int addr, int digit, byte value, bool dp) {
     byte v;
 
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(digit<0 || digit>7 || value>15)
-return;
+        return;
     offset=addr*8;
     v=charTable[value];
     if(dp)
@@ -151,18 +152,18 @@ void LedControl::setChar(int addr, int digit, char value, bool dp) {
     byte index,v;
 
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(digit<0 || digit>7)
  	return;
     offset=addr*8;
     index=(byte)value;
     if(index >127) {
-//nothing define we use the space char
-value=32;
+        //nothing define we use the space char
+        value=32;
     }
     v=charTable[index];
     if(dp)
-v|=128;
+        v|=128;
     status[offset+digit]=v;
     spiTransfer(addr, digit+1,v);
 }
@@ -173,7 +174,7 @@ void LedControl::spiTransfer(int addr, volatile byte opcode, volatile byte data)
     int maxbytes=maxDevices*2;
 
     for(int i=0;i<maxbytes;i++)
- spidata[i]=(byte)0;
+        spidata[i]=(byte)0;
     //put our device data into the array
     spidata[offset+1]=opcode;
     spidata[offset]=data;
@@ -198,6 +199,111 @@ void LedControl::tweenLetters (int addr, const byte c1, const byte c2, int speed
                 setColumn(addr, 7-col, cp437_font [c1] [col+step]);
             else
                 setColumn(addr, 7-col, cp437_font [c2] [col+step-8]);
+        }
+        delay(speed);
+    }
+}
+
+/* @pierreca's additions ************************************************************************/
+void LedControl::setText(char *message, int messageLength) {
+    int limit = messageLength < maxDevices ? messageLength : maxDevices;
+
+    for(int i = 0; i < limit; i++) {
+        setLetter(i, message[i]);
+    }
+}
+
+void LedControl::scrollText(char *message, int messageLength, int speed) {
+    for (int i = 0; i < maxDevices; i++) {
+        clearDisplay(i);
+    }
+
+    for (int j = 0; j < (messageLength - 1) * 8; j++) {
+        for(int i = maxCols; i >= 0; i--) {
+            setColumn(i / 8, i % 8, cp437_font[message[(maxCols - i + j) / 8]][(maxCols - i + j) % 8]);
+        }
+        delay(speed);
+    }
+}
+
+void LedControl::buildTrimmedText(char *message, int messageLength, ColumnsTable *result, bool addPadding) {
+    const byte emptyColumn = 0;
+    const byte spaceWidth = 4;
+
+    int paddingSpace = addPadding ? maxCols * 2 : 0;
+
+    result->columns = new byte[messageLength * 8 + paddingSpace]; // 8 columns per letter by default + 2 times blank screens (before / after the message) if addPadding is true
+    bool alreadyHasSpace = false;
+    int currentColumnIndex = 0;
+
+    if (addPadding) {
+        // add some space at the beginning
+        for (int i = 0; i < maxCols; i++) {
+            result->columns[currentColumnIndex] = emptyColumn;
+            currentColumnIndex++;
+        }
+    }
+
+    // scroll through letters and for each letter, copy columns, trimming all but one whitespace column.
+    for(int i = 0; i < messageLength; i++) {
+        if (message[i] == ' ') {
+            for (int j = 0; j < spaceWidth; j++) {
+                result->columns[currentColumnIndex] = emptyColumn;
+                currentColumnIndex++;
+            }
+        } else {
+            for (int j = 0; j < 8; j++) {
+                byte candidate = cp437_font[message[i]][j];
+
+                if (alreadyHasSpace && candidate == emptyColumn) {
+                    continue;
+                } else if (alreadyHasSpace && candidate != emptyColumn) {
+                    alreadyHasSpace = false;
+                } else if (!alreadyHasSpace && candidate == emptyColumn) {
+                    alreadyHasSpace = true;
+                }
+
+                result->columns[currentColumnIndex] = candidate;
+                currentColumnIndex++;
+            }
+        }
+    }
+
+    if (addPadding) {
+        // add some space at the end
+        for (int i = 0; i < maxCols; i++) {
+            result->columns[currentColumnIndex] = emptyColumn;
+            currentColumnIndex++;
+        }
+    }
+
+    result->columnsCount = currentColumnIndex;
+}
+
+void LedControl::setTextTrimSpaces(char *message, int messageLength) {
+    ColumnsTable trimmedTextColumns;
+    buildTrimmedText(message, messageLength, &trimmedTextColumns);
+
+    for (int i = 0; i < maxDevices; i++) {
+        clearDisplay(i);
+    }
+
+    for(int i = 0; i < maxCols; i++) {
+        setColumn(i / colsPerDisplay, 7 - (i % colsPerDisplay), trimmedTextColumns.columns[i]);
+    }
+}
+
+void LedControl::scrollTextTrimSpaces(char *message, int messageLength, int speed) {
+    ColumnsTable trimmedTextColumns;
+    buildTrimmedText(message, messageLength, &trimmedTextColumns, true);
+
+    for (int i = 0; i < maxDevices; i++) {
+        clearDisplay(i);
+    }
+
+    for (int j = 0; j < trimmedTextColumns.columnsCount - maxCols; j++) {
+        for(int i = 0; i < maxCols; i++) {
+            setColumn(i / colsPerDisplay, 7 - (i % colsPerDisplay), trimmedTextColumns.columns[i+j]);
         }
         delay(speed);
     }
