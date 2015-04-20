@@ -9,7 +9,9 @@ The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12
 - [x] Order more PCBs
 - [x] Build more Matrices
 - [x] Build and order a "motherboard" on which LED matrix modules will be connected.
-- [ ] Test the "motherboard".
+- [x] Test the "motherboard".
+- [ ] Cleanup code style.
+- [ ] Implement "Line" abstraction layer that will allow to update and render both lines independently
 
 ## Hardware
 * [NFM-12883AS-11 LED Matrix](https://upverter.com/upn/b3a03be171307eb0/)
