@@ -91,17 +91,20 @@ void LedControl::setLed(int addr, int row, int column, bool state) {
     byte val=0x00;
 
     if(addr<0 || addr>=maxDevices)
-return;
+        return;
     if(row<0 || row>7 || column<0 || column>7)
-return;
+        return;
+
     offset=addr*8;
     val=128 >> column;
+
     if(state)
-status[offset+row]=status[offset+row]|val;
+        status[offset+row]=status[offset+row]|val;
     else {
-val=~val;
-status[offset+row]=status[offset+row]&val;
+        val=~val;
+        status[offset+row]=status[offset+row]&val;
     }
+
     spiTransfer(addr, row+1,status[offset+row]);
 }
 
@@ -182,7 +185,7 @@ void LedControl::spiTransfer(int addr, volatile byte opcode, volatile byte data)
     digitalWrite(SPI_CS,LOW);
     //Now shift out the data
     for(int i=maxbytes;i>0;i--)
- 	 shiftOut(SPI_MOSI,SPI_CLK,MSBFIRST,spidata[i-1]);
+        shiftOut(SPI_MOSI,SPI_CLK,MSBFIRST,spidata[i-1]);
     //latch the data onto the display
     digitalWrite(SPI_CS,HIGH);
 }
@@ -232,6 +235,9 @@ void LedControl::buildTrimmedText(char *message, int messageLength, ColumnsTable
 
     int paddingSpace = addPadding ? maxCols * 2 : 0;
 
+    if (result->columns != NULL)
+        delete(result->columns);
+
     result->columns = new byte[messageLength * 8 + paddingSpace]; // 8 columns per letter by default + 2 times blank screens (before / after the message) if addPadding is true
     bool alreadyHasSpace = false;
     int currentColumnIndex = 0;
@@ -280,33 +286,26 @@ void LedControl::buildTrimmedText(char *message, int messageLength, ColumnsTable
     result->columnsCount = currentColumnIndex;
 }
 
-void LedControl::setTextTrimSpaces(char *message, int messageLength) {
-    ColumnsTable trimmedTextColumns;
-    buildTrimmedText(message, messageLength, &trimmedTextColumns);
-
-    for (int i = 0; i < maxDevices; i++) {
-        clearDisplay(i);
-    }
+void LedControl::displayTrimmedText(ColumnsTable *trimmedTextColumns, int scrollIndex) {
+    if (trimmedTextColumns == NULL)
+        return;
 
     for(int i = 0; i < maxCols; i++) {
-        setColumn(i / colsPerDisplay, 7 - (i % colsPerDisplay), trimmedTextColumns.columns[i]);
+        setColumn(i / colsPerDisplay, 7 - (i % colsPerDisplay), trimmedTextColumns->columns[i+scrollIndex]);
     }
+
 }
 
-void LedControl::scrollTextTrimSpaces(char *message, int messageLength, int speed) {
-    ColumnsTable trimmedTextColumns;
-    buildTrimmedText(message, messageLength, &trimmedTextColumns, true);
-
-    for (int i = 0; i < maxDevices; i++) {
-        clearDisplay(i);
-    }
-
-    for (int j = 0; j < trimmedTextColumns.columnsCount - maxCols; j++) {
-        for(int i = 0; i < maxCols; i++) {
-            setColumn(i / colsPerDisplay, 7 - (i % colsPerDisplay), trimmedTextColumns.columns[i+j]);
+void LedControl::clearAllDisplays()
+{
+        for (int i = 0; i < maxDevices; i++) {
+            clearDisplay(i);
         }
-        delay(speed);
-    }
+}
+
+uint8_t LedControl::getColumnsCount()
+{
+    return maxCols;
 }
 
 /************************************************************************************************/

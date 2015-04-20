@@ -1,6 +1,6 @@
 #include "LedControl.h"
 
-#define MATRIX_PER_LINE 3
+#define MATRIX_PER_LINE 8
 #define LINE_COUNT 2
 #define SPARK_API_MSG_SIZE 63
 
@@ -21,10 +21,20 @@ int recvBufferLength = 0;
 
 bool newMessage = false;
 int active_line = 0;
+int scrollSpeed = 0;
+int scrollIndex = 0;
+ColumnsTable *colsTable = NULL;
+uint8_t maxCols = 0;
 
 void setup() {
     lines[0] = new LedControl(din_0, clk_0, cs_0, MATRIX_PER_LINE); // DIN, CLK, CS, HowManyDisplays
     lines[1] = new LedControl(din_1, clk_1, cs_1, MATRIX_PER_LINE); // DIN, CLK, CS, HowManyDisplays
+
+    maxCols = lines[0]->getColumnsCount();
+
+    colsTable = new ColumnsTable();
+    colsTable->columns = NULL;
+    colsTable->columnsCount = 0;
 
     for (int j = 0; j < LINE_COUNT; j++) {
         for (int i = 0; i < MATRIX_PER_LINE; i++) {
@@ -33,22 +43,37 @@ void setup() {
         }
     }
 
+    String str = String("Hello!");
+    setMessage(str);
+
     Spark.variable("recvBuffer", recvBuffer, STRING);
     Spark.variable("activeLine", &active_line, INT);
+    Spark.variable("scrollSpeed", &scrollSpeed, INT);
     Spark.function("setMessage", setMessage);
     Spark.function("setActiveLine", setActiveLine);
+    Spark.function("setScrollSpeed", setScrollSpeed);
 }
 
 void loop() {
     if (newMessage) {
         strcpy(message, recvBuffer);
+        lines[active_line]->buildTrimmedText(message, recvBufferLength, colsTable, scrollSpeed != 0);
+        lines[active_line]->clearAllDisplays();
+        scrollIndex = 0;
         newMessage = false;
     }
 
-    lines[active_line]->scrollTextTrimSpaces(message, recvBufferLength, 50);
-    lines[active_line]->setTextTrimSpaces(message, recvBufferLength);
+    if (scrollIndex == colsTable->columnsCount - maxCols)
+    {
+        scrollIndex = 0;
+    }
 
-    delay(1000);
+    lines[active_line]->displayTrimmedText(colsTable, scrollIndex);
+
+    if(scrollSpeed != 0) {
+        scrollIndex++;
+        delay(scrollSpeed);
+    }
 }
 
 int setMessage(String msg) {
@@ -67,4 +92,15 @@ int setActiveLine(String msg) {
     }
 
     return active_line;
+}
+
+int setScrollSpeed(String msg) {
+    int new_scrollSpeed = msg.toInt();
+    if(new_scrollSpeed < 0) {
+        return -1;
+    } else {
+        scrollSpeed = new_scrollSpeed;
+    }
+
+    return scrollSpeed;
 }

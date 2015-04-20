@@ -457,7 +457,9 @@ class LedControl {
 
     void buildTrimmedText(char *message, int messageLength, ColumnsTable *result, bool addPadding = false);
 
-    void setTextTrimSpaces(char *message, int messageLength);
+    void displayTrimmedText(ColumnsTable *trimmedTextColumns, int scrollIndex);
 
-    void scrollTextTrimSpaces(char *message, int messageLength, int speed);
+    void clearAllDisplays();
+
+    uint8_t getColumnsCount();
 };
