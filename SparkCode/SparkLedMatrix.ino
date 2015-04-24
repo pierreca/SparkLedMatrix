@@ -20,7 +20,7 @@ char recvBuffer[SPARK_API_MSG_SIZE];
 int recvBufferLength = 0;
 
 bool newMessage = false;
-int active_line = 0;
+int activeLine = 0;
 int scrollSpeed = 0;
 int scrollIndex = 0;
 ColumnsTable *colsTable = NULL;
@@ -47,7 +47,7 @@ void setup() {
     setMessage(str);
 
     Spark.variable("recvBuffer", recvBuffer, STRING);
-    Spark.variable("activeLine", &active_line, INT);
+    Spark.variable("activeLine", &activeLine, INT);
     Spark.variable("scrollSpeed", &scrollSpeed, INT);
     Spark.function("setMessage", setMessage);
     Spark.function("setActiveLine", setActiveLine);
@@ -57,18 +57,17 @@ void setup() {
 void loop() {
     if (newMessage) {
         strcpy(message, recvBuffer);
-        lines[active_line]->buildTrimmedText(message, recvBufferLength, colsTable, scrollSpeed != 0);
-        lines[active_line]->clearAllDisplays();
+        lines[activeLine]->buildTrimmedText(message, recvBufferLength, colsTable, scrollSpeed != 0);
+        lines[activeLine]->clearAllDisplays();
         scrollIndex = 0;
         newMessage = false;
     }
 
-    if (scrollIndex == colsTable->columnsCount - maxCols)
-    {
+    if (scrollIndex == colsTable->columnsCount - maxCols) {
         scrollIndex = 0;
     }
 
-    lines[active_line]->displayTrimmedText(colsTable, scrollIndex);
+    lines[activeLine]->displayTrimmedText(colsTable, scrollIndex);
 
     if(scrollSpeed != 0) {
         scrollIndex++;
@@ -77,21 +76,22 @@ void loop() {
 }
 
 int setMessage(String msg) {
-        recvBufferLength = msg.length() + 1;
-        msg.toCharArray(recvBuffer, recvBufferLength);
-        newMessage = true;
-        return recvBufferLength - 1;
+    recvBufferLength = msg.length() + 1;
+    msg.toCharArray(recvBuffer, recvBufferLength);
+    newMessage = true;
+    return recvBufferLength - 1;
 }
 
 int setActiveLine(String msg) {
-    int new_active_line = msg.toInt();
-    if(new_active_line < 0 || new_active_line >= LINE_COUNT) {
+    int new_activeLine = msg.toInt();
+
+    if(new_activeLine < 0 || new_activeLine >= LINE_COUNT) {
         return -1;
     } else {
-        active_line = new_active_line;
+        activeLine = new_activeLine;
     }
 
-    return active_line;
+    return activeLine;
 }
 
 int setScrollSpeed(String msg) {

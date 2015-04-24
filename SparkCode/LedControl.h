@@ -451,15 +451,48 @@ class LedControl {
     void tweenLetters (int addr, const byte c1, const byte c2, int speed=100);
 
     // Added by @pierreca
+    /*
+     * Set text to be displayed on all screens (whitespace will not be trimmed: one letter per display)
+     * Params:
+     * message: string containing the text to be displayed
+     * messageLength: Length of the message to be displayed
+     */
     void setText(char *message, int messageLength);
 
+    /*
+     * Set text to be displayed on all screens and scroll it (whitespace will not be trimmed: one letter per display)
+     * Params:
+     * message: string containing the text to be displayed
+     * messageLength: Length of the message to be displayed
+     * speed: interval to use between each iteration of scrolling
+     */
     void scrollText(char *message, int messageLength, int speed);
 
+    /*
+     * Build a table of columns based on the text and trim the whitespace between to columns to maximize the number of letters displayed.
+     * Params:
+     * message: string containing the text to process
+     * messageLength: Length of the text to process
+     * result: Table of columns to be displayed
+     * addPadding: indicates whether whitespace should be added before and after the text to make scrolling look better.
+     */
     void buildTrimmedText(char *message, int messageLength, ColumnsTable *result, bool addPadding = false);
 
+    /*
+     * Display a table of columns on all screens
+     * Params:
+     * trimmedTextColumns: table of columns to be displayed
+     * scrollIndex: column index at which the text should be displayed
+     */
     void displayTrimmedText(ColumnsTable *trimmedTextColumns, int scrollIndex);
 
+    /*
+     * Clear all displays
+     */
     void clearAllDisplays();
 
+    /*
+     * returns the number of columns on all screens]
+     */
     uint8_t getColumnsCount();
 };
