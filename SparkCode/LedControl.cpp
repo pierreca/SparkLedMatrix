@@ -292,7 +292,12 @@ void LedControl::buildTrimmedText(char *message, int messageLength, ColumnsTable
         delete(result->columns);
 
     // 8 columns per letter by default + 2 times blank screens (before / after the message) if addPadding is true
-    result->columns = new byte[messageLength * 8 + paddingSpace];
+    int initialColumnsCount = messageLength * 8 + paddingSpace;
+    if (initialColumnsCount < maxCols) {
+        initialColumnsCount = maxCols;
+    }
+
+    result->columns = new byte[initialColumnsCount];
     bool alreadyHasSpace = false;
     int currentColumnIndex = 0;
 
@@ -335,6 +340,11 @@ void LedControl::buildTrimmedText(char *message, int messageLength, ColumnsTable
             result->columns[currentColumnIndex] = emptyColumn;
             currentColumnIndex++;
         }
+    }
+
+    for (int i = currentColumnIndex; i < maxCols; i++) {
+        result->columns[i] = emptyColumn;
+        currentColumnIndex++;
     }
 
     result->columnsCount = currentColumnIndex;

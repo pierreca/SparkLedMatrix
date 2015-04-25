@@ -11,7 +11,8 @@ The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12
 - [x] Build and order a "motherboard" on which LED matrix modules will be connected.
 - [x] Test the "motherboard".
 - [x] Cleanup code style.
-- [ ] Implement "Line" abstraction layer that will allow to update and render both lines independently
+- [x] Implement "Line" abstraction layer that will allow to update and render both lines independently
+- [ ] Optimize rendering routine (see below in the "Optimization Opportunity section")
 
 ## Hardware
 * [NFM-12883AS-11 LED Matrix](https://upverter.com/upn/b3a03be171307eb0/)
@@ -32,6 +33,9 @@ Currently the code is super basic and just scrolls or displays statically a mess
 The LedControl library found on spark.io is a port from the Arduino LedControl library and contains basic functions such as piloting each LED individually, displaying letters using a monospaced font (called cp437) and "tweening" letters meaning scrolling a letter out while the next scrolls in.
 
 Since this was a little too basic to obtain a message scrolling on multiple adjacent LED matrices I wrote additional functions that make text scroll across multiple matrices in 2 different ways: either using the default monospaced font (which will always amount to one letter per matrix) or that trims whitespace to make it more readable and waste less columns. I've also added a method to simply statically display text on multiple matrices (trimming spaces).
+
+### Optimization opportunity
+The current rendering routine is column-based, which means we calculate and render columns one by one. this is based of the LedControl library implementation but it's very inefficient since each column takes 8 SPI messages to transfer (one for each LED). Switching to a line-based rendering algorithm would require only one SPI message per line, which means we'd render a full LED matrix in 8 messages instead of 64.
 
 ## Pictures
 ![Current prototype](/pictures/currentproto.jpg)
