@@ -13,6 +13,8 @@ The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12
 - [x] Cleanup code style.
 - [x] Implement "Line" abstraction layer that will allow to update and render both lines independently
 - [ ] Optimize rendering routine (see below in the "Optimization Opportunity section")
+- [ ] Design case with OpenBeam and laser-cut acrylic
+- [ ] Build web service or app to simply send messages to the LED Matrix
 
 ## Hardware
 * [NFM-12883AS-11 LED Matrix](https://upverter.com/upn/b3a03be171307eb0/)
@@ -36,6 +38,9 @@ Since this was a little too basic to obtain a message scrolling on multiple adja
 
 ### Optimization opportunity
 The current rendering routine is column-based, which means we calculate and render columns one by one. this is based of the LedControl library implementation but it's very inefficient since each column takes 8 SPI messages to transfer (one for each LED). Switching to a line-based rendering algorithm would require only one SPI message per line, which means we'd render a full LED matrix in 8 messages instead of 64.
+
+### Case design
+I wanted to do something simple with OpenBeam aluminium extrusions, but the form-factor doesn't allow for use of their regular L-brackets. Instead, I'm laser-cutting acrylic plates (black on the sides, dark transparent grey in front).
 
 ## Pictures
 ![Current prototype](/pictures/currentproto.jpg)
