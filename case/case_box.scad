@@ -15,6 +15,8 @@ module ob_1515(length)
 
 module ob_chassis(offset_x, offset_y, offset_z)
 {
+translate([offset_x, offset_y, offset_z])
+{
     // Front, Horizontal
     translate([0,0,ob_width])
         rotate([0, 90, 0])
@@ -66,7 +68,7 @@ module ob_chassis(offset_x, offset_y, offset_z)
     translate([300 - ob_width, ob_width, 90 + ob_width])
         rotate([-90, 0, 0])
             ob_1515(30);
-
+}
 }
 
 module side_plates()
