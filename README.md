@@ -12,8 +12,8 @@ The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12
 - [x] Test the "motherboard".
 - [x] Cleanup code style.
 - [x] Implement "Line" abstraction layer that will allow to update and render both lines independently
+- [x] Design case with OpenBeam and laser-cut acrylic
 - [ ] Optimize rendering routine (see below in the "Optimization Opportunity section")
-- [ ] Design case with OpenBeam and laser-cut acrylic
 - [ ] Build web service or app to simply send messages to the LED Matrix
 
 ## Hardware
@@ -40,7 +40,7 @@ Since this was a little too basic to obtain a message scrolling on multiple adja
 The current rendering routine is column-based, which means we calculate and render columns one by one. this is based of the LedControl library implementation but it's very inefficient since each column takes 8 SPI messages to transfer (one for each LED). Switching to a line-based rendering algorithm would require only one SPI message per line, which means we'd render a full LED matrix in 8 messages instead of 64.
 
 ### Case design
-I wanted to do something simple with OpenBeam aluminium extrusions, but the form-factor doesn't allow for use of their regular L-brackets. Instead, I'm laser-cutting acrylic plates (black on the sides, dark transparent grey in front).
+I wanted to do something simple with OpenBeam aluminium extrusions, but the form-factor doesn't allow for use of their regular L-brackets. Instead, I'm laser-cutting acrylic plates (black on the sides, dark transparent grey in front). The current version doesn't account for material lost during laser-cutting (meaning the edges are not perfectly aligned, there's a 0.5 millimeters error) and does not include mounting holes on the inside plate and power-supply cable hole at the back (I manually drilled those).
 
 ## Pictures
 ![Current prototype](/pictures/currentproto.jpg)
@@ -48,3 +48,7 @@ I wanted to do something simple with OpenBeam aluminium extrusions, but the form
 ![Current prototype](/pictures/matrices_assembly.jpg)
 ![Current prototype](/pictures/matrices_back.jpg)
 ![Current prototype](/pictures/matrices_front.jpg)
+![Current prototype](/pictures/matrices_assembled.jpg)
+![Current prototype](/pictures/openbox_front.jpg)
+![Current prototype](/pictures/openbox_top.jpg)
+![Current prototype](/pictures/assembled.jpg)
