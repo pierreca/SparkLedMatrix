@@ -1,0 +1,63 @@
+body {
+  font: 14px Helvetica, Arial, sans-serif;
+}
+
+#pageContent {
+  border: 1px solid darkred;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+}
+
+#header,form,#errorBody,#confirmBody {
+  padding: 2em 5em;
+  text-align: center;
+}
+
+#header {
+  background: darkred;
+  padding: 0.5em 5em;
+}
+
+h1,h3 {
+  color: white;
+  text-align: center;
+}
+
+form {
+  margin-bottom: 1em;
+}
+
+#form,#confirmBody {
+  display: table;
+  margin: 0 auto;
+}
+
+#form p,#confirmBody p {
+  display: table-row;
+}
+
+#form label,#confirmBody label {
+  display: table-cell;
+  font-weight: bold;
+  text-align: right;
+  vertical-align: middle;
+  padding-right: 1em;
+  white-space: nowrap;
+}
+
+#form input,#form select, #confirmBody input {
+  display: table-cell;
+  vertical-align: middle;
+  margin: 0.4em;
+}
+
+#submitBtnContainer {
+  text-align: center;
+  margin-top: 2em;
+}
+
+#submitBtnContainer input {
+  display:inline;
+  padding: 0.5em 3em;
+}

@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  div#pageContent
+    div#header
+      h1 Sent!
+    
+    div#confirmBody
+      p
+        label Message: 
+        input(type='text', 'disabled', value="#{message}", size='64')
+      p
+        label Scroll Delay: 
+        input(type='text', 'disabled', value="#{scroll}", size='4')
+      p
+        label Line:
+        input(type='text', 'disabled', value="#{line}", size='4')
