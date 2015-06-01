@@ -2,14 +2,16 @@ var express = require('express');
 var spark = require('spark');
 var router = express.Router();
 
+var deviceId = process.env.DeviceId;
+var token = process.env.AccessToken;
+
 router.get('/', function(req, res, next) {
-  var token = req.query.token;
   if(!token) {
     res.render('deviceError', { reason: 'Authentication needed' });
   } else {
     spark.login({accessToken: token}).then(
       function (body) {
-        spark.getDevice('<DEVICE_ID>').then(
+        spark.getDevice(deviceId).then(
           function(device) {
             res.render('index', { title: 'SparkLedMatrix', deviceName: device.name });    
           },
@@ -25,13 +27,12 @@ router.get('/', function(req, res, next) {
 });
   
 router.post('/', function(req, res, next) {
-  var token = req.query.token;
   if (!token) {
     res.render('deviceError', { reason: 'Authentication needed' });  
   } else {
     spark.login({accessToken: token}).then(
       function(body) {
-        spark.getDevice('<DEVICE_ID>').then(
+        spark.getDevice(deviceId).then(
           function(device) {
             device.callFunction('setActiveLin', req.body.line).then(
               function (data) {
