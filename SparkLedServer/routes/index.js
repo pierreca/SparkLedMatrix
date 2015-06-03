@@ -1,77 +1,25 @@
 var express = require('express');
-var spark = require('spark');
 var router = express.Router();
-
-var deviceId = process.env.DeviceId;
-var token = process.env.AccessToken;
+var sparkLedMatrix = require('./sparkledmatrix');
 
 router.get('/', function(req, res, next) {
-  if(!token) {
-    res.render('deviceError', { reason: 'Authentication needed' });
-  } else {
-    spark.login({accessToken: token}).then(
-      function (body) {
-        spark.getDevice(deviceId).then(
-          function(device) {
-            res.render('index', { title: 'SparkLedMatrix', deviceName: device.name });    
-          },
-          function(err){
-              res.render('deviceError', { reason: 'Auth error or could not find the device' });            
-          });
-      },
-      function(err) {
-        res.render('deviceError', { reason: 'Authentication failed' });
-      }
-    );
-  }
+  sparkLedMatrix.getDeviceName().then(function (deviceName) {
+    res.render('index', { title: 'SparkLedMatrix', deviceName: deviceName });
+  }).catch(function (error) {    
+    res.render('deviceError', { reason: error });
+  });
 });
   
 router.post('/', function(req, res, next) {
-  if (!token) {
-    res.render('deviceError', { reason: 'Authentication needed' });  
-  } else {
-    spark.login({accessToken: token}).then(
-      function(body) {
-        spark.getDevice(deviceId).then(
-          function(device) {
-            device.callFunction('setActiveLin', req.body.line).then(
-              function (data) {
-                device.callFunction('setScrollDel', req.body.scrollDelay).then(
-                  function(data) {
-                    device.callFunction('setMessage', req.body.message).then(
-                      function(data) {
-                        res.render('confirm', {
-                          device: device.name, 
-                          message: req.body.message,
-                          scroll: req.body.scrollDelay,
-                          line: req.body.line
-                        });
-                      },
-                      function(err) {
-                        res.render('deviceError', { reason: 'setMessage' });
-                      }
-                    );
-                  },
-                  function(err) {
-                    res.render('deviceError', { reason: 'setScrollDelay' });
-                  }
-                );       
-               },
-              function (err) { 
-                res.render('deviceError', { reason: 'setActiveLine' });                
-              }
-            );  
-          },
-          function(err) {
-            res.render('deviceError', { reason: 'getDevice' });
-          }
-        );  
-      },
-      function(err) {
-        res.render('deviceError', { reason: 'login' });
-      }
-    );
-  }
+  sparkLedMatrix.sendMessage(req.body.line, req.body.scrollDelay, req.body.message).then(function (confirmation) {
+    res.render('confirm', confirmation);
+  }).catch(function(error) {
+    res.render('deviceError', {reason: error});
+  });
+});
+
+router.post('/api', function (req, res, next) {
+  res.sendStatus(200);
 });
 
 module.exports = router;
