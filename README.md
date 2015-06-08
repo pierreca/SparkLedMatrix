@@ -14,7 +14,8 @@ The end goal of this project is to build a Matrix of 16 8x8 LED Matrices (NFM-12
 - [x] Implement "Line" abstraction layer that will allow to update and render both lines independently
 - [x] Design case with OpenBeam and laser-cut acrylic
 - [x] Build website to simply send messages to the LED Matrix
-- [ ] Add UI to turn on/off the LED Matrix from the Azure website
+- [X] Build an API endpoint in the website.
+- [ ] Add UI to turn on/off the LED Matrix from the Azure website. (Right the equivalent can be done by sending empty messages)
 - [ ] Optimize rendering routine (see below in the "Optimization Opportunity section")
 
 ## Hardware
@@ -43,9 +44,15 @@ The current rendering routine is column-based, which means we calculate and rend
 ### Case design
 I wanted to do something simple with OpenBeam aluminium extrusions, but the form-factor doesn't allow for use of their regular L-brackets. Instead, I'm laser-cutting acrylic plates (black on the sides, dark transparent grey in front). The current version doesn't account for material lost during laser-cutting (meaning the edges are not perfectly aligned, there's a 0.5 millimeters error) and does not include mounting holes on the inside plate and power-supply cable hole at the back (I manually drilled those).
 
-### website
+### Website
 The SparkLedServer folder contains a super simple node.js/express based app that can be deployed to any cloud infrastructure (mine went on Azure). It will require the Spark access token and device ID in environment variables to function (otherwise you'll get an Authentication error).
 Since it's super easy and quick to change these in Azure, I'd rather have the service configured this way than using the Spark/Particle authentication widget since I don't want to have to enter my username/password every time. Even though it means that anyone can access the service and send messages to the device. I'll change that if it becomes a problem. 
+
+### API
+The API is extremely simple and also described in index.js. It's just a REST endpoint at the /api path that needs to be sent a POST request with the following parameters:
+* line: 0 or 1 for first or second line
+* scrollDelay: a postive integer of the delay between each iteration of the scrolling mechanism, in milliseconds. 0 means no scrolling.
+* message: the message to be sent, must be less than 63 characters (Particle API limitation).
 
 ## Pictures
 ![Current prototype](/pictures/currentproto.jpg)
